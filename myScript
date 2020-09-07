@@ -1,0 +1,20 @@
+#!/bin/bash
+
+
+y=$(find log -type f | shuf -n 1)
+x=$(grep -o -P '(?<=^.{27}search : )[^\s]+' $y | sort | uniq | grep --count ^)
+
+echo Statistics from file $y: Total number of keywords searched: $x
+
+
+while read line; do
+array_freq+=( "$line" )
+done < <( grep -hr '.*' log | awk '$7 == "search"' | sort -u -V -k  9,11 | awk '{print NF-10,
+$0}' | sort -nr  | awk '{print $1,$10}' | awk '{sums[$2] += $1} END { for (i in sums) printf("%s %s\n", i, sums[i])}' | sort -nk2)
+
+a=( ${array_freq[0]} )
+b=( ${array_freq[-1]} )
+
+printf "Keyword most frequenty found: %s [totalNumFilesFound: %s]\n" "${b[0]}" "${b[1]}"
+printf "Keyword least frequenty found: %s [totalNumFilesFound: %s]\n" "${a[0]}" "${a[1]}"
+
